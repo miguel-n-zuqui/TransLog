@@ -1,0 +1,74 @@
+﻿@page "/calcularfrete"
+@using FronEnd.Model.Request
+@using FronEnd.Model.Response
+<h3>Calculadora De Frete</h3>
+<EditForm Model="_freteRequest" OnValidSubmit="ValorFrete">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-4">
+            <label>Distância em KM</label>
+            <InputNumber @bind-Value="_freteRequest.Distancia" class="form-control" />
+            <ValidationMessage For="() => _freteRequest.Distancia" />
+        </div>
+        <div class="col-4">
+            <label>Peso da carga em KG</label>
+            <InputNumber @bind-Value="_freteRequest.PesoCarga" class="form-control" />
+            <ValidationMessage For="() => _freteRequest.PesoCarga" />
+        </div>
+        <div class="col-4">
+            <label>Largura em  </label>
+            <InputNumber @bind-Value="_freteRequest.Largura" class="form-control" />
+            <ValidationMessage For="() => _freteRequest.Largura" />
+        </div>
+        <div class="col-4">
+            <label> altura</label>
+            <InputNumber @bind-Value="_freteRequest.Altura" class="form-control" />
+            <ValidationMessage For="() => _freteRequest.Altura" />
+        </div>
+        <div class="col-2">
+            <button type="submit" class="btn btn-outline-primary mt-2">CALCULAR FRETE</button>
+        </div>
+    </div>
+</EditForm>
+@if (exibirFrete)
+{
+    <div class="row mt-4 p-5">
+        <div class="col-md-12">
+            <div class="h-100 text-center p-5 rounded-3">
+
+                <h5>
+                    <span>@_freteResponse.ValorFrete</span>
+                </h5>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private FreteRequest _freteRequest { get; set; } = new();
+    private FreteResponse _freteResponse { get; set; } = new();
+    private bool exibirFrete = false;
+    private async Task ValorFrete()
+    {
+        var apiUrl = $"https://localhost:7216/Frete/obter?Distancia={_freteRequest.Distancia}&Altura={_freteRequest.Altura}&Largura={_freteRequest.Largura}&PesoCarga={_freteRequest.PesoCarga}";
+        var http = new HttpClient();
+
+
+        try
+        {
+            //faça um httpget para a api passando o nome e a data de nascimento o retorno é um objeto do tipo CarteirinhaResponse
+            _freteResponse = await http.GetFromJsonAsync<FreteResponse>(apiUrl);
+
+            //Verifica se existe um valor para a cor de fundo, se existir exibe a carteirinha
+            if (_freteResponse.ValorFrete != 0)
+        {
+                exibirFrete = true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+}
